@@ -8,7 +8,6 @@ public class MovimientoRequest {
     private UUID guardiaId;
     private TipoMovimiento tipoMovimiento;
 
-    // Getters y setters
 
     public UUID getUsuarioId() {
         return usuarioId;

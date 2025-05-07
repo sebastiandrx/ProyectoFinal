@@ -20,5 +20,7 @@ public class TokenLoginService {
     public TokenLogin save(TokenLogin tokenLogin) {
         return tokenRepo.save(tokenLogin);
     }
+
+
 }
 
