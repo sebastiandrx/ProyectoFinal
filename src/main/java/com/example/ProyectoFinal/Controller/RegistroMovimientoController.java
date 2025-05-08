@@ -1,8 +1,7 @@
 package com.example.ProyectoFinal.Controller;
 
-import com.example.ProyectoFinal.Models.MovimientoRequest;
-import com.example.ProyectoFinal.Models.RegistroMovimiento;
-import com.example.ProyectoFinal.Models.TokenService;
+import com.example.ProyectoFinal.Models.*;
+import com.example.ProyectoFinal.Repository.TokenLoginRepository;
 import com.example.ProyectoFinal.Service.RegistroMovimientoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,8 @@ public class RegistroMovimientoController {
 
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private TokenLoginRepository tokenRepo;
 
     @Autowired
     private RegistroMovimientoService movimientoService;
@@ -37,6 +38,10 @@ public class RegistroMovimientoController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token no autorizado");
         }
 
+        Usuario guardia = tokenRepo.findByToken(token).get().getUsuario();
+        if (!guardia.getRol().equals(Rol.GUARDIA)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo el guardia puede registrar movimientos");
+        }
         RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }
@@ -50,6 +55,31 @@ public class RegistroMovimientoController {
     public ResponseEntity<List<RegistroMovimiento>> historialGeneral() {
         return ResponseEntity.ok(movimientoService.historialGeneral());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RegistroMovimiento> obtenerPorId(@PathVariable UUID id) {
+        return movimientoService.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarMovimiento(@PathVariable UUID id) {
+        if (movimientoService.eliminarPorId(id)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<RegistroMovimiento>> filtrarPorFechas(
+            @RequestParam("desde") String desde,
+            @RequestParam("hasta") String hasta) {
+        List<RegistroMovimiento> resultados = movimientoService.filtrarPorFechas(desde, hasta);
+        return ResponseEntity.ok(resultados);
+    }
+
 }
 
 

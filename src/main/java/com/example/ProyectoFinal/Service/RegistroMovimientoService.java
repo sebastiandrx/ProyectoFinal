@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -51,4 +52,24 @@ public class RegistroMovimientoService {
     public List<RegistroMovimiento> historialGeneral() {
         return registroRepo.findAll();
     }
+
+    public Optional<RegistroMovimiento> obtenerPorId(UUID id) {
+        return registroRepo.findById(id);
+    }
+
+    public boolean eliminarPorId(UUID id) {
+        if (registroRepo.existsById(id)) {
+            registroRepo.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public List<RegistroMovimiento> filtrarPorFechas(String desde, String hasta) {
+        LocalDateTime fechaDesde = LocalDateTime.parse(desde);
+        LocalDateTime fechaHasta = LocalDateTime.parse(hasta);
+        return registroRepo.findByFechaHoraBetween(fechaDesde, fechaHasta);
+    }
+
+
 }

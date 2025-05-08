@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface TokenLoginRepository extends JpaRepository<TokenLogin, UUID> {
     Optional<TokenLogin> findByToken(String token);
     Optional<TokenLogin> findByUsuario(Usuario usuario);
+
 }

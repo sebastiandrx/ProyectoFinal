@@ -14,13 +14,26 @@ public class TokenService {
     private TokenLoginRepository tokenRepo;
 
     public boolean tokenValido(String token) {
-        // Quitar prefijo Bearer si existe
-        if (token != null && token.startsWith("Bearer ")) {
+        if (token == null) return false;
+
+        // Quitar "Bearer " si está presente
+        if (token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
 
-        // Buscar el token y verificar si aún no ha expirado
         Optional<TokenLogin> encontrado = tokenRepo.findByToken(token);
-        return encontrado.isPresent() && encontrado.get().getExpiracion().isAfter(LocalDateTime.now());
+        return encontrado.isPresent() &&
+                encontrado.get().getExpiracion() != null &&
+                encontrado.get().getExpiracion().isAfter(LocalDateTime.now());
+    }
+
+    public void logout(String token) {
+        if (token == null) return;
+
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        tokenRepo.findByToken(token).ifPresent(tokenRepo::delete);
     }
 }
