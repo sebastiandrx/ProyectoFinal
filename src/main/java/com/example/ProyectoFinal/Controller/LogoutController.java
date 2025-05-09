@@ -1,6 +1,6 @@
 package com.example.ProyectoFinal.Controller;
 
-import com.example.ProyectoFinal.Models.TokenService;
+import com.example.ProyectoFinal.Service.TokenService;
 import com.example.ProyectoFinal.Repository.TokenLoginRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;

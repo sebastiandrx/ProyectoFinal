@@ -1,15 +1,21 @@
 package com.example.ProyectoFinal.Controller;
 
+import com.example.ProyectoFinal.Models.Equipo;
 import com.example.ProyectoFinal.Models.Usuario;
 import com.example.ProyectoFinal.Repository.EquipoRepository;
 import com.example.ProyectoFinal.Repository.UsuarioRepository;
+import com.example.ProyectoFinal.Service.QrService;
 import com.example.ProyectoFinal.Service.UsuarioService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +28,8 @@ public class UsuarioController {
     private EquipoRepository equipoRepo;
     @Autowired
     private UsuarioRepository usuarioRepo;
+    @Autowired
+    private QrService qrService;
 
     @GetMapping
     public List<Usuario> getUsuarios() {
@@ -63,4 +71,23 @@ public class UsuarioController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/{id}/qr")
+    public ResponseEntity<byte[]> generarQr(@PathVariable UUID id) throws Exception {
+        Usuario usuario = usuarioService.obtenerUsuarioPorId(id); // asegúrate de tener este método
+        Equipo equipo = equipoRepo.findByUsuarioId(id).stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("Equipo no encontrado"));
+
+        Map<String, String> contenido = new HashMap<>();
+        contenido.put("usuarioId", usuario.getId().toString());
+        contenido.put("equipoId", equipo.getId().toString());
+
+        String json = new ObjectMapper().writeValueAsString(contenido);
+        byte[] qrBytes = qrService.generarQr(json);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(qrBytes);
+    }
+
 }
