@@ -62,4 +62,14 @@ public class EquipoController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/api/equipos")
+    public ResponseEntity<?> registrarEquipo(@RequestBody Equipo equipo) {
+        if (equipo.getUsuario() == null) {
+            return ResponseEntity.badRequest().body("usuario_id es requerido");
+        }
+        Equipo guardado = equipoRepo.save(equipo);
+        return ResponseEntity.ok(guardado);
+    }
+
 }
