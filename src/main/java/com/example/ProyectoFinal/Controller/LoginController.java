@@ -26,7 +26,7 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<Usuario> login(@RequestBody LoginRequest request) {
         Optional<Usuario> usuario = usuarioRepository.findByCorreoAndDocumento(
-                request.getDocumento(), request.getCorreo()
+                request.getCorreo(), request.getDocumento()
         );
 
         return usuario
