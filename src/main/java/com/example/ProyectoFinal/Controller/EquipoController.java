@@ -22,10 +22,6 @@ public class EquipoController {
     @Autowired
     private UsuarioRepository usuarioRepo;
 
-    @PostMapping
-    public Equipo createEquipo(@RequestBody Equipo equipo) {
-        return equipoRepo.save(equipo);
-    }
 
     @GetMapping("/usuario/{usuarioId}")
     public List<Equipo> getEquiposPorUsuario(@PathVariable UUID usuarioId) {
