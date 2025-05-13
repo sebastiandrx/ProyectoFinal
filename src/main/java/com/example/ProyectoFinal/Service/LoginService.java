@@ -35,7 +35,6 @@ public class LoginService {
 
         // 🔐 Crear un nuevo token completamente limpio
         TokenLogin nuevo = new TokenLogin();
-        nuevo.setId(UUID.randomUUID());
         nuevo.setUsuario(usuario);
         nuevo.setToken(UUID.randomUUID().toString());
         nuevo.setExpiracion(LocalDateTime.now().plusDays(1));

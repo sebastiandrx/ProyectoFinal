@@ -13,5 +13,6 @@ public interface RegistroMovimientoRepository extends JpaRepository<RegistroMovi
     List<RegistroMovimiento> findByUsuarioId(UUID usuarioId);
     List<RegistroMovimiento> findByEquipoId(UUID equipoId);
     List<RegistroMovimiento> findByFechaHoraBetween(LocalDateTime desde, LocalDateTime hasta);
+    List<RegistroMovimiento> findByUsuarioIdAndEquipoIdOrderByFechaHoraDesc(UUID usuarioId, UUID equipoId);
 
 }

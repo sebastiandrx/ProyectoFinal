@@ -94,26 +94,27 @@ public class RegistroMovimientoController {
                 .map(TokenLogin::getUsuario)
                 .orElse(null);
 
-        if (guardia == null || !Rol.GUARDIA.equals(guardia.getRol())) {
+        if (guardia == null || !Rol.GUARDIA.name().equalsIgnoreCase(guardia.getRol())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo el guardia puede registrar movimientos");
         }
 
         try {
+            UUID usuarioId = UUID.fromString(datos.get("usuarioId"));
+            UUID equipoId = UUID.fromString(datos.get("equipoId"));
+
+            TipoMovimiento tipo = movimientoService.determinarTipoMovimiento(usuarioId, equipoId);
+
             MovimientoRequest request = new MovimientoRequest();
-            request.setUsuarioId(UUID.fromString(datos.get("usuarioId")));
-            request.setEquipoId(UUID.fromString(datos.get("equipoId")));
+            request.setUsuarioId(usuarioId);
+            request.setEquipoId(equipoId);
             request.setGuardiaId(guardia.getId());
-            request.setTipoMovimiento(TipoMovimiento.valueOf("ENTRADA")); // Aquí poner lógica para alternar con "SALIDA"
+            request.setTipoMovimiento(tipo);
 
             RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
         }
     }
-
-
-
 }
-
 

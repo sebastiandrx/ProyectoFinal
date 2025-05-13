@@ -1,9 +1,6 @@
 package com.example.ProyectoFinal.Service;
 
-import com.example.ProyectoFinal.Models.Equipo;
-import com.example.ProyectoFinal.Models.MovimientoRequest;
-import com.example.ProyectoFinal.Models.RegistroMovimiento;
-import com.example.ProyectoFinal.Models.Usuario;
+import com.example.ProyectoFinal.Models.*;
 import com.example.ProyectoFinal.Repository.EquipoRepository;
 import com.example.ProyectoFinal.Repository.RegistroMovimientoRepository;
 import com.example.ProyectoFinal.Repository.UsuarioRepository;
@@ -71,5 +68,13 @@ public class RegistroMovimientoService {
         return registroRepo.findByFechaHoraBetween(fechaDesde, fechaHasta);
     }
 
-
+    public TipoMovimiento determinarTipoMovimiento(UUID usuarioId, UUID equipoId) {
+        List<RegistroMovimiento> historial = registroRepo.findByUsuarioIdAndEquipoIdOrderByFechaHoraDesc(usuarioId, equipoId);
+        if (historial.isEmpty()) {
+            return TipoMovimiento.ENTRADA;
+        }
+        return historial.get(0).getTipoMovimiento() == TipoMovimiento.ENTRADA
+                ? TipoMovimiento.SALIDA
+                : TipoMovimiento.ENTRADA;
+    }
 }
