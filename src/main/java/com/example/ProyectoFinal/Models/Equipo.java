@@ -13,7 +13,7 @@ public class Equipo {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private Usuario usuario;
 
     private String marca;

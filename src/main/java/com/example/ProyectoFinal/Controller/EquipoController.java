@@ -1,12 +1,16 @@
 package com.example.ProyectoFinal.Controller;
 
+import com.example.ProyectoFinal.Models.DispositivoRequest;
 import com.example.ProyectoFinal.Models.Equipo;
+import com.example.ProyectoFinal.Models.Usuario;
 import com.example.ProyectoFinal.Repository.EquipoRepository;
+import com.example.ProyectoFinal.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -15,7 +19,8 @@ public class EquipoController {
 
     @Autowired
     private EquipoRepository equipoRepo;
-
+    @Autowired
+    private UsuarioRepository usuarioRepo;
 
     @PostMapping
     public Equipo createEquipo(@RequestBody Equipo equipo) {
@@ -64,11 +69,22 @@ public class EquipoController {
     }
 
     @PostMapping("/api/equipos")
-    public ResponseEntity<?> registrarEquipo(@RequestBody Equipo equipo) {
-        if (equipo.getUsuario() == null) {
-            return ResponseEntity.badRequest().body("usuario_id es requerido");
+    public ResponseEntity<?> registrarEquipo(@RequestBody DispositivoRequest request) {
+        Optional<Usuario> usuarioOpt = usuarioRepo.findById(request.getUsuario_id());
+
+        if (!usuarioOpt.isPresent()) {
+            return ResponseEntity.badRequest().body("Usuario no encontrado");
         }
+
+        Equipo equipo = new Equipo();
+        equipo.setMarca(request.getMarca());
+        equipo.setModelo(request.getModelo());
+        equipo.setSerial(request.getSerial());
+        equipo.setFotoUrl(request.getFotoUrl());
+        equipo.setUsuario(usuarioOpt.get()); // Vinculación aquí
+
         Equipo guardado = equipoRepo.save(equipo);
+
         return ResponseEntity.ok(guardado);
     }
 
