@@ -8,8 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+
 public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
-    Optional<Usuario> findByDocumentoAndCorreo(String documento, String correo);
+
+    Optional<Usuario> findByCorreoAndDocumento(String correo, String documento);
 
 }
+
 
