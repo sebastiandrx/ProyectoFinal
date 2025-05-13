@@ -1,8 +1,8 @@
 package com.example.ProyectoFinal.Models;
 
 public class LoginRequest {
-    private String correo;
     private String documento;
+    private String correo;
 
     public String getCorreo() {
         return correo;
