@@ -68,7 +68,7 @@ public class EquipoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/api/equipos")
+    @PostMapping
     public ResponseEntity<?> registrarEquipo(@RequestBody DispositivoRequest request) {
         Optional<Usuario> usuarioOpt = usuarioRepo.findById(request.getUsuario_id());
 
@@ -76,16 +76,18 @@ public class EquipoController {
             return ResponseEntity.badRequest().body("Usuario no encontrado");
         }
 
+        Usuario usuario = usuarioOpt.get();
+
         Equipo equipo = new Equipo();
         equipo.setMarca(request.getMarca());
         equipo.setModelo(request.getModelo());
         equipo.setSerial(request.getSerial());
         equipo.setFotoUrl(request.getFotoUrl());
-        equipo.setUsuario(usuarioOpt.get()); // Vinculación aquí
+        equipo.setUsuario(usuario); // 👈 AQUÍ VINCULAS CORRECTAMENTE
 
         Equipo guardado = equipoRepo.save(equipo);
 
         return ResponseEntity.ok(guardado);
     }
-
 }
+
