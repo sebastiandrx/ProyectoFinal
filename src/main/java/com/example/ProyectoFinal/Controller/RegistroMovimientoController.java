@@ -85,7 +85,7 @@ public class RegistroMovimientoController {
 
     @PostMapping("/escanear-qr")
     public ResponseEntity<?> escanearQr(@RequestHeader("Authorization") String authHeader,
-                                        @RequestBody MovimientoQrRequest datos) {
+                                        @RequestBody Map<String, String> datos) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
         }
@@ -100,9 +100,10 @@ public class RegistroMovimientoController {
         }
 
         try {
-            UUID usuarioId = datos.getUsuarioId();
-            UUID equipoId = datos.getEquipoId();
-            TipoMovimiento tipo = datos.getTipoMovimiento();
+            UUID usuarioId = UUID.fromString(datos.get("usuarioId"));
+            UUID equipoId = UUID.fromString(datos.get("equipoId"));
+
+            TipoMovimiento tipo = movimientoService.determinarTipoMovimiento(usuarioId, equipoId);
 
             MovimientoRequest request = new MovimientoRequest();
             request.setUsuarioId(usuarioId);
@@ -111,18 +112,18 @@ public class RegistroMovimientoController {
             request.setTipoMovimiento(tipo);
 
             RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
-
-            Map<String, Object> resultado = new HashMap<>();
             Usuario usuario = nuevo.getUsuario();
 
-            resultado.put("nombre", usuario.getNombre());
-            resultado.put("documento", usuario.getDocumento());
-            resultado.put("carrera", usuario.getCarrera());
-            resultado.put("fechaHora", nuevo.getFechaHora());
-            resultado.put("tipoMovimiento", nuevo.getTipoMovimiento().name());
+            RegistroMovimientoResponse response = new RegistroMovimientoResponse(
+                    usuario.getNombre(),
+                    usuario.getDocumento(),
+                    nuevo.getEquipo().getMarca() + " - " + nuevo.getEquipo().getModelo(),
+                    usuario.getCarrera(),
+                    nuevo.getFechaHora().toString(),
+                    nuevo.getTipoMovimiento().name()
+            );
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
-
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
         }
