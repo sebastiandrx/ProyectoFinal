@@ -100,17 +100,19 @@ public class RegistroMovimientoController {
         }
 
         try {
+            // Extraer datos del body JSON
             UUID usuarioId = UUID.fromString(datos.get("usuarioId"));
             UUID equipoId = UUID.fromString(datos.get("equipoId"));
+            TipoMovimiento tipo = TipoMovimiento.valueOf(datos.get("tipoMovimiento").toUpperCase());
 
-            TipoMovimiento tipo = movimientoService.determinarTipoMovimiento(usuarioId, equipoId);
-
+            // Crear el request
             MovimientoRequest request = new MovimientoRequest();
             request.setUsuarioId(usuarioId);
             request.setEquipoId(equipoId);
             request.setGuardiaId(guardia.getId());
             request.setTipoMovimiento(tipo);
 
+            // Ejecutar y construir la respuesta
             RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
             Usuario usuario = nuevo.getUsuario();
 
@@ -124,9 +126,11 @@ public class RegistroMovimientoController {
             );
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
         }
     }
+
 }
 
