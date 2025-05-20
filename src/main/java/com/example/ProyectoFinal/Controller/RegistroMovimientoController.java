@@ -83,7 +83,9 @@ public class RegistroMovimientoController {
         return ResponseEntity.ok(resultados);
     }
 
+
     @PostMapping("/escanear-qr")
+    
     public ResponseEntity<?> escanearQr(@RequestHeader("Authorization") String authHeader,
                                         @RequestBody Map<String, String> datos) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
