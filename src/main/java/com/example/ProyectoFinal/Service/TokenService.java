@@ -40,17 +40,24 @@ public class TokenService {
         tokenRepo.findByToken(token).ifPresent(tokenRepo::delete);
     }
 
-    public TokenLogin generarToken(Usuario usuario) {
-        String token = UUID.randomUUID().toString();
-        LocalDateTime expiracion = LocalDateTime.now().plusHours(2);
+    public String generarToken(Usuario usuario) {
+        String token = UUID.randomUUID().toString(); // o JWT si usas JWT
 
-        TokenLogin tokenLogin = new TokenLogin();
-        tokenLogin.setToken(token);
-        tokenLogin.setUsuario(usuario);
-        tokenLogin.setExpiracion(expiracion);
+        TokenLogin nuevoToken = new TokenLogin();
+        nuevoToken.setToken(token);
+        nuevoToken.setUsuario(usuario);
+        nuevoToken.setExpiracion(LocalDateTime.now().plusHours(1)); // ejemplo de duración
 
-        tokenRepo.save(tokenLogin);
-        return tokenLogin;
+        tokenRepo.save(nuevoToken);
+
+        return token;
     }
+
+    public LocalDateTime obtenerExpiracionDelToken(String token) {
+        return tokenRepo.findByToken(token)
+                .map(TokenLogin::getExpiracion)
+                .orElse(LocalDateTime.now());
+    }
+
 
 }

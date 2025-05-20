@@ -29,7 +29,7 @@ public class LoginController {
     private TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoAndDocumento(
                 request.getCorreo(), request.getDocumento()
         );
@@ -37,18 +37,24 @@ public class LoginController {
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
 
-            // 🔐 Generar token JWT
-            TokenLogin nuevoToken = tokenService.generarToken(usuario);
+            // ✅ Generar token y guardar en la base de datos
+            String token = tokenService.generarToken(usuario);
+
+            // ✅ Obtener la expiración desde el token guardado
+            LocalDateTime expiracion = tokenService.obtenerExpiracionDelToken(token);
+
+            // ✅ Crear LoginResponse
             LoginResponse response = new LoginResponse(
                     usuario.getId(),
                     usuario.getRol(),
-                    nuevoToken.getToken(),
-                    nuevoToken.getExpiracion()
+                    token,
+                    expiracion
             );
 
             return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(401).body("Credenciales inválidas");
+            return ResponseEntity.status(401).body(null);
         }
     }
+
 }
