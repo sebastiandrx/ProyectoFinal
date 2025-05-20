@@ -8,6 +8,7 @@ import com.example.ProyectoFinal.Repository.TokenLoginRepository;
 import com.example.ProyectoFinal.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class LoginService {
     @Autowired
     private TokenLoginRepository tokenRepo;
 
-    public Optional<LoginResponse> login(LoginRequest request) {
+    public Optional<LoginResponse> login(@RequestBody LoginRequest request) {
         Optional<Usuario> usuario = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento());
         if (usuario.isPresent()) {
             String token = UUID.randomUUID().toString();

@@ -30,6 +30,7 @@ public class Usuario {
         this.id = id;
     }
 
+
     public String getNombre() {
         return nombre;
     }
