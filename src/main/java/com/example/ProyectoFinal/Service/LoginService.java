@@ -28,13 +28,14 @@ public class LoginService {
 
     public Optional<LoginResponse> login(@RequestBody LoginRequest request) {
         Optional<Usuario> usuario = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento());
+
         if (usuario.isPresent()) {
             String token = UUID.randomUUID().toString();
             LocalDateTime expiracion = LocalDateTime.now().plusHours(2);
 
             TokenLogin tokenLogin = new TokenLogin();
             tokenLogin.setUsuario(usuario.get());
-            tokenLoginService.getByToken(token);
+            tokenLogin.setToken(token); // ← ✅ Aquí sí se asigna el token
             tokenLogin.setExpiracion(expiracion);
             tokenLoginService.save(tokenLogin);
 
@@ -45,6 +46,7 @@ public class LoginService {
                     expiracion
             ));
         }
+
         return Optional.empty();
     }
 }
