@@ -41,15 +41,16 @@ public class TokenService {
     }
 
     public String generarToken(Usuario usuario) {
-        String token = UUID.randomUUID().toString(); // o JWT si usas JWT
+        // Si ya existe un token para ese usuario, eliminarlo antes de crear uno nuevo
+        tokenRepo.findByUsuario(usuario).ifPresent(tokenRepo::delete);
 
+        String token = UUID.randomUUID().toString();
         TokenLogin nuevoToken = new TokenLogin();
-        nuevoToken.setToken(token);
         nuevoToken.setUsuario(usuario);
-        nuevoToken.setExpiracion(LocalDateTime.now().plusHours(1)); // ejemplo de duración
+        nuevoToken.setToken(token);
+        nuevoToken.setExpiracion(LocalDateTime.now().plusHours(2)); // duración del token
 
         tokenRepo.save(nuevoToken);
-
         return token;
     }
 

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,30 +25,25 @@ public class LoginService {
     @Autowired
     private TokenLoginRepository tokenRepo;
 
-    public LoginResponse login(LoginRequest request) {
-        Usuario usuario = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    public Optional<LoginResponse> login(LoginRequest request) {
+        Optional<Usuario> usuario = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento());
+        if (usuario.isPresent()) {
+            String token = UUID.randomUUID().toString();
+            LocalDateTime expiracion = LocalDateTime.now().plusHours(2);
 
-        // 🔥 Eliminar cualquier token viejo antes de intentar guardar uno nuevo
-        tokenRepo.findByUsuario(usuario).ifPresent(anterior -> {
-            tokenRepo.deleteById(anterior.getId());
-        });
+            TokenLogin tokenLogin = new TokenLogin();
+            tokenLogin.setUsuario(usuario.get());
+            tokenLogin.setToken(token);
+            tokenLogin.setExpiracion(expiracion);
+            tokenRepo.save(tokenLogin);
 
-        // 🔐 Crear un nuevo token completamente limpio
-        TokenLogin nuevo = new TokenLogin();
-        nuevo.setUsuario(usuario);
-        nuevo.setToken(UUID.randomUUID().toString());
-        nuevo.setExpiracion(LocalDateTime.now().plusDays(1));
-
-        // Guardar usando el servicio
-        tokenLoginService.save(nuevo);
-
-        return new LoginResponse(
-                usuario.getId(),
-                usuario.getRol(),
-                nuevo.getToken(),
-                nuevo.getExpiracion()
-        );
+            return Optional.of(new LoginResponse(
+                    usuario.get().getId(),
+                    usuario.get().getRol(),
+                    token,
+                    expiracion
+            ));
+        }
+        return Optional.empty();
     }
-
 }
