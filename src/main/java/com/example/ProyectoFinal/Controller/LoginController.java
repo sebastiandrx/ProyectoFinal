@@ -39,9 +39,8 @@ public class LoginController {
 
             // ✅ Generar token y guardar en la base de datos
             String token = tokenService.generarToken(usuario);
-
-            // ✅ Obtener la expiración desde el token guardado
             LocalDateTime expiracion = tokenService.obtenerExpiracionDelToken(token);
+
 
             // ✅ Crear LoginResponse
             LoginResponse response = new LoginResponse(
@@ -50,11 +49,10 @@ public class LoginController {
                     token,
                     expiracion
             );
-
             return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(401).body(null);
         }
+
+        return ResponseEntity.status(401).build();
     }
 
 }
