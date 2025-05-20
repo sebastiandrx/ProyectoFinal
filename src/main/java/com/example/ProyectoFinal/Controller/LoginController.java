@@ -23,8 +23,7 @@ public class LoginController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-    @Autowired
-    private LoginService loginService;
+
     @Autowired
     private TokenService tokenService;
 
@@ -37,22 +36,24 @@ public class LoginController {
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
 
-            // ✅ Generar token y guardar en la base de datos
+            // ✅ Generar token
             String token = tokenService.generarToken(usuario);
+
+            // ✅ Obtener expiración desde la base de datos
             LocalDateTime expiracion = tokenService.obtenerExpiracionDelToken(token);
 
-
-            // ✅ Crear LoginResponse
+            // ✅ Crear objeto de respuesta
             LoginResponse response = new LoginResponse(
                     usuario.getId(),
                     usuario.getRol(),
                     token,
                     expiracion
             );
+
             return ResponseEntity.ok(response);
         }
 
-        return ResponseEntity.status(401).build();
+        return ResponseEntity.status(401).body(null);
     }
-
 }
+

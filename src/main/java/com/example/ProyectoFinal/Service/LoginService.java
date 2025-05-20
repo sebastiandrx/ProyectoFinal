@@ -33,9 +33,9 @@ public class LoginService {
 
             TokenLogin tokenLogin = new TokenLogin();
             tokenLogin.setUsuario(usuario.get());
-            tokenLogin.setToken(token);
+            tokenLoginService.getByToken(token);
             tokenLogin.setExpiracion(expiracion);
-            tokenRepo.save(tokenLogin);
+            tokenLoginService.save(tokenLogin);
 
             return Optional.of(new LoginResponse(
                     usuario.get().getId(),
