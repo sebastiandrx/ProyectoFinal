@@ -79,32 +79,25 @@ public class RegistroMovimientoController {
     }
 
     @PostMapping("/escanear-qr")
-    public ResponseEntity<?> escanearQr(@RequestHeader("Authorization") String authHeader,
-                                        @RequestBody Map<String, String> datos) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
-        }
-        String token = authHeader.substring(7);
-        Usuario guardia = tokenRepo.findByToken(token)
-                .map(TokenLogin::getUsuario)
-                .orElse(null);
-        if (guardia == null || !Rol.GUARDIA.name().equalsIgnoreCase(guardia.getRol())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo el guardia puede registrar movimientos");
-        }
+    public ResponseEntity<?> escanearQr(@RequestBody Map<String, String> datos) {
         try {
-            // Extraer datos del body JSON
             UUID usuarioId = UUID.fromString(datos.get("usuarioId"));
             UUID equipoId = UUID.fromString(datos.get("equipoId"));
-            TipoMovimiento tipo = TipoMovimiento.valueOf(datos.get("tipoMovimiento").toUpperCase());
-            // Crear el request
+
+            // Puedes forzar un guardiaId fijo o de prueba temporalmente:
+            UUID guardiaId = UUID.fromString("00000000-0000-0000-0000-000000000001"); // <- ID cualquiera o real
+
+            TipoMovimiento tipo = movimientoService.determinarTipoMovimiento(usuarioId, equipoId);
+
             MovimientoRequest request = new MovimientoRequest();
             request.setUsuarioId(usuarioId);
             request.setEquipoId(equipoId);
-            request.setGuardiaId(guardia.getId());
+            request.setGuardiaId(guardiaId);
             request.setTipoMovimiento(tipo);
-            // Ejecutar y construir la respuesta
+
             RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
             Usuario usuario = nuevo.getUsuario();
+
             RegistroMovimientoResponse response = new RegistroMovimientoResponse(
                     usuario.getNombre(),
                     usuario.getDocumento(),
@@ -113,6 +106,7 @@ public class RegistroMovimientoController {
                     nuevo.getFechaHora().toString(),
                     nuevo.getTipoMovimiento().name()
             );
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
