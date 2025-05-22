@@ -110,11 +110,18 @@ public class RegistroMovimientoController {
                     nuevo.getTipoMovimiento().name()
             );
 
+            System.out.println("📦 Movimiento creado:");
+            System.out.println("Usuario: " + nuevo.getUsuario());
+            System.out.println("Equipo: " + nuevo.getEquipo());
+            System.out.println("Tipo: " + nuevo.getTipoMovimiento());
+            System.out.println("Fecha: " + nuevo.getFechaHora());
+
             System.out.println("✅ Movimiento registrado correctamente.");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
-            e.printStackTrace(); // 🔍 Imprime cualquier error
+            e.printStackTrace(); // ✅ agrega esto para ver el error real
+            System.out.println("❌ Error: " + e.getMessage()); // Log visible
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
         }
     }
