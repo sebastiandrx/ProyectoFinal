@@ -133,6 +133,23 @@ public class RegistroMovimientoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
         }
     }
+    @PostMapping("/simulado")
+    public ResponseEntity<?> registrarSimulado(@RequestBody MovimientoRequest request) {
+        RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
+        Usuario usuario = nuevo.getUsuario();
+
+        RegistroMovimientoResponse response = new RegistroMovimientoResponse(
+                usuario.getNombre(),
+                usuario.getDocumento(),
+                nuevo.getEquipo().getMarca() + " - " + nuevo.getEquipo().getModelo(),
+                usuario.getCarrera(),
+                nuevo.getFechaHora().toString(),
+                nuevo.getTipoMovimiento().name()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 
 }
 

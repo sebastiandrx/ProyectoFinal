@@ -21,27 +21,30 @@ public class LoginService {
     private UsuarioRepository usuarioRepo;
 
     @Autowired
-    private TokenLoginService tokenLoginService;
-
-    @Autowired
     private TokenLoginRepository tokenRepo;
 
-    public Optional<LoginResponse> login(@RequestBody LoginRequest request) {
-        Optional<Usuario> usuario = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento());
+    public Optional<LoginResponse> login(LoginRequest request) {
+        Optional<Usuario> usuarioOpt = usuarioRepo.findByCorreoAndDocumento(
+                request.getCorreo(), request.getDocumento());
 
-        if (usuario.isPresent()) {
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+
             String token = UUID.randomUUID().toString();
             LocalDateTime expiracion = LocalDateTime.now().plusHours(2);
 
-            TokenLogin tokenLogin = new TokenLogin();
-            tokenLogin.setUsuario(usuario.get());
-            tokenLogin.setToken(token); // ← ✅ Aquí sí se asigna el token
-            tokenLogin.setExpiracion(expiracion);
-            tokenLoginService.save(tokenLogin);
+            // ⚠️ IMPORTANTE: eliminar token anterior si existe
+            tokenRepo.findByUsuario(usuario).ifPresent(tokenRepo::delete);
+
+            TokenLogin nuevoToken = new TokenLogin();
+            nuevoToken.setUsuario(usuario);
+            nuevoToken.setToken(token);
+            nuevoToken.setExpiracion(expiracion);
+            tokenRepo.save(nuevoToken);
 
             return Optional.of(new LoginResponse(
-                    usuario.get().getId(),
-                    usuario.get().getRol(),
+                    usuario.getId(),
+                    usuario.getRol(),
                     token,
                     expiracion
             ));
