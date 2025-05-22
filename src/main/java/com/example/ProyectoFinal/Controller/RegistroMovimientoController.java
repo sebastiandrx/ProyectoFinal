@@ -81,19 +81,22 @@ public class RegistroMovimientoController {
     @PostMapping("/escanear-qr")
     public ResponseEntity<?> escanearQr(@RequestBody Map<String, String> datos) {
         try {
-            UUID usuarioId = UUID.fromString(datos.get("usuarioId"));
-            UUID equipoId = UUID.fromString(datos.get("equipoId"));
+            String usuarioIdStr = datos.get("usuarioId");
+            String equipoIdStr = datos.get("equipoId");
 
-            // Puedes forzar un guardiaId fijo o de prueba temporalmente:
-            UUID guardiaId = UUID.fromString("00000000-0000-0000-0000-000000000001"); // <- ID cualquiera o real
+            System.out.println("📥 Recibido usuarioId: " + usuarioIdStr);
+            System.out.println("📥 Recibido equipoId: " + equipoIdStr);
+
+            UUID usuarioId = UUID.fromString(usuarioIdStr);
+            UUID equipoId = UUID.fromString(equipoIdStr);
 
             TipoMovimiento tipo = movimientoService.determinarTipoMovimiento(usuarioId, equipoId);
 
             MovimientoRequest request = new MovimientoRequest();
             request.setUsuarioId(usuarioId);
             request.setEquipoId(equipoId);
-            request.setGuardiaId(guardiaId);
             request.setTipoMovimiento(tipo);
+            request.setGuardiaId(UUID.randomUUID()); // ← simulado, si quitaste validación de token
 
             RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
             Usuario usuario = nuevo.getUsuario();
@@ -107,8 +110,11 @@ public class RegistroMovimientoController {
                     nuevo.getTipoMovimiento().name()
             );
 
+            System.out.println("✅ Movimiento registrado correctamente.");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
         } catch (Exception e) {
+            e.printStackTrace(); // 🔍 Imprime cualquier error
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
         }
     }
