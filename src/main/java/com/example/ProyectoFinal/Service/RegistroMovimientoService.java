@@ -69,12 +69,18 @@ public class RegistroMovimientoService {
     }
 
     public TipoMovimiento determinarTipoMovimiento(UUID usuarioId, UUID equipoId) {
-        List<RegistroMovimiento> historial = registroRepo.findByUsuarioIdAndEquipoIdOrderByFechaHoraDesc(usuarioId, equipoId);
+        // Buscar el último movimiento de ese usuario y equipo
+        List<RegistroMovimiento> historial = registroRepo
+                .findByUsuarioIdAndEquipoIdOrderByFechaHoraDesc(usuarioId, equipoId);
+
         if (historial.isEmpty()) {
-            return TipoMovimiento.ENTRADA;
+            return TipoMovimiento.ENTRADA; // Si no hay registro, inicia con ENTRADA
         }
-        return historial.get(0).getTipoMovimiento() == TipoMovimiento.ENTRADA
+
+        RegistroMovimiento ultimo = historial.get(0);
+        return ultimo.getTipoMovimiento() == TipoMovimiento.ENTRADA
                 ? TipoMovimiento.SALIDA
                 : TipoMovimiento.ENTRADA;
     }
+
 }
