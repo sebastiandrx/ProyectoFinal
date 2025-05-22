@@ -36,7 +36,10 @@ public class RegistroMovimientoController {
         if (!tokenService.tokenValido(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token no autorizado");
         }
-        Usuario guardia = tokenRepo.findByToken(token).get().getUsuario();
+        Usuario guardia = tokenRepo.findByToken(token)
+                .map(TokenLogin::getUsuario)
+                .orElseThrow(() -> new RuntimeException("Token no asociado a un usuario"));
+
         if (!guardia.getRol().equals(Rol.GUARDIA)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo el guardia puede registrar movimientos");
         }
@@ -96,7 +99,7 @@ public class RegistroMovimientoController {
             request.setUsuarioId(usuarioId);
             request.setEquipoId(equipoId);
             request.setTipoMovimiento(tipo);
-            request.setGuardiaId(UUID.randomUUID()); // ← simulado, si quitaste validación de token
+            request.setGuardiaId(UUID.fromString("5c4518e5-abc1-4bf3-b803-5fefd4d6ab9d"));
 
             RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
             Usuario usuario = nuevo.getUsuario();
