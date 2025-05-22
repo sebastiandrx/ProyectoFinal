@@ -24,8 +24,7 @@ public class LoginService {
     private TokenLoginRepository tokenRepo;
 
     public Optional<LoginResponse> login(LoginRequest request) {
-        Optional<Usuario> usuarioOpt = usuarioRepo.findByCorreoAndDocumento(
-                request.getCorreo(), request.getDocumento());
+        Optional<Usuario> usuarioOpt = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento());
 
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
@@ -33,21 +32,24 @@ public class LoginService {
             String token = UUID.randomUUID().toString();
             LocalDateTime expiracion = LocalDateTime.now().plusHours(2);
 
-            // ⚠️ IMPORTANTE: eliminar token anterior si existe
-            tokenRepo.findByUsuario(usuario).ifPresent(tokenRepo::delete);
+            TokenLogin tokenLogin = new TokenLogin();
+            tokenLogin.setUsuario(usuario);
+            tokenLogin.setToken(token);
+            tokenLogin.setExpiracion(expiracion);
+            tokenRepo.save(tokenLogin);
 
-            TokenLogin nuevoToken = new TokenLogin();
-            nuevoToken.setUsuario(usuario);
-            nuevoToken.setToken(token);
-            nuevoToken.setExpiracion(expiracion);
-            tokenRepo.save(nuevoToken);
-
-            return Optional.of(new LoginResponse(
+            LoginResponse response = new LoginResponse(
                     usuario.getId(),
+                    usuario.getNombre(),
+                    usuario.getDocumento(),
+                    usuario.getCorreo(),
+                    usuario.getCarrera(),
                     usuario.getRol(),
                     token,
                     expiracion
-            ));
+            );
+
+            return Optional.of(response);
         }
 
         return Optional.empty();

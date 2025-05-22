@@ -27,12 +27,11 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        Optional<LoginResponse> response = loginService.login(request);
-
-        return response
+        return loginService.login(request)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(401).build());
+                .orElse(ResponseEntity.status(401).build());
     }
+
 }
 
 
