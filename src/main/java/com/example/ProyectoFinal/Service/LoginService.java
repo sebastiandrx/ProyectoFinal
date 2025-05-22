@@ -1,5 +1,4 @@
 package com.example.ProyectoFinal.Service;
-
 import com.example.ProyectoFinal.Models.LoginRequest;
 import com.example.ProyectoFinal.Models.LoginResponse;
 import com.example.ProyectoFinal.Models.TokenLogin;
@@ -8,50 +7,43 @@ import com.example.ProyectoFinal.Repository.TokenLoginRepository;
 import com.example.ProyectoFinal.Repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class LoginService {
-
     @Autowired
     private UsuarioRepository usuarioRepo;
-
+    @Autowired
+    private TokenLoginService tokenLoginService;
     @Autowired
     private TokenLoginRepository tokenRepo;
 
-    public Optional<LoginResponse> login(LoginRequest request) {
-        Optional<Usuario> usuarioOpt = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento());
+    public LoginResponse login(LoginRequest request) {
+        Usuario usuario = usuarioRepo.findByCorreoAndDocumento(request.getCorreo(), request.getDocumento())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (usuarioOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
+        // 🔥 Eliminar cualquier token viejo antes de intentar guardar uno nuevo
+        tokenRepo.findByUsuario(usuario).ifPresent(anterior -> {
+            tokenRepo.deleteById(anterior.getId());
+        });
 
-            String token = UUID.randomUUID().toString();
-            LocalDateTime expiracion = LocalDateTime.now().plusHours(2);
+        // 🔐 Crear un nuevo token completamente limpio
+        TokenLogin nuevo = new TokenLogin();
+        nuevo.setUsuario(usuario);
+        nuevo.setToken(UUID.randomUUID().toString());
+        nuevo.setExpiracion(LocalDateTime.now().plusDays(1));
 
-            TokenLogin tokenLogin = new TokenLogin();
-            tokenLogin.setUsuario(usuario);
-            tokenLogin.setToken(token);
-            tokenLogin.setExpiracion(expiracion);
-            tokenRepo.save(tokenLogin);
+        // Guardar usando el servicio
+        tokenLoginService.save(nuevo);
 
-            LoginResponse response = new LoginResponse(
-                    usuario.getId(),
-                    usuario.getNombre(),
-                    usuario.getDocumento(),
-                    usuario.getCorreo(),
-                    usuario.getCarrera(),
-                    usuario.getRol(),
-                    token,
-                    expiracion
-            );
-
-            return Optional.of(response);
-        }
-
-        return Optional.empty();
+        return new LoginResponse(
+                usuario.getId(),
+                usuario.getRol(),
+                nuevo.getToken(),
+                nuevo.getExpiracion()
+        );
     }
+
 }

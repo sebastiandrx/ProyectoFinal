@@ -19,12 +19,10 @@ import java.util.UUID;
 @RequestMapping("/api/movimientos")
 @SecurityRequirement(name = "bearerAuth")
 public class RegistroMovimientoController {
-
     @Autowired
     private TokenService tokenService;
     @Autowired
     private TokenLoginRepository tokenRepo;
-
     @Autowired
     private RegistroMovimientoService movimientoService;
 
@@ -34,13 +32,10 @@ public class RegistroMovimientoController {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido o ausente");
         }
-
         String token = authHeader.substring(7);
-
         if (!tokenService.tokenValido(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token no autorizado");
         }
-
         Usuario guardia = tokenRepo.findByToken(token).get().getUsuario();
         if (!guardia.getRol().equals(Rol.GUARDIA)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo el guardia puede registrar movimientos");
@@ -83,41 +78,33 @@ public class RegistroMovimientoController {
         return ResponseEntity.ok(resultados);
     }
 
-
     @PostMapping("/escanear-qr")
-    
     public ResponseEntity<?> escanearQr(@RequestHeader("Authorization") String authHeader,
                                         @RequestBody Map<String, String> datos) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
         }
-
         String token = authHeader.substring(7);
         Usuario guardia = tokenRepo.findByToken(token)
                 .map(TokenLogin::getUsuario)
                 .orElse(null);
-
         if (guardia == null || !Rol.GUARDIA.name().equalsIgnoreCase(guardia.getRol())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Solo el guardia puede registrar movimientos");
         }
-
         try {
             // Extraer datos del body JSON
             UUID usuarioId = UUID.fromString(datos.get("usuarioId"));
             UUID equipoId = UUID.fromString(datos.get("equipoId"));
             TipoMovimiento tipo = TipoMovimiento.valueOf(datos.get("tipoMovimiento").toUpperCase());
-
             // Crear el request
             MovimientoRequest request = new MovimientoRequest();
             request.setUsuarioId(usuarioId);
             request.setEquipoId(equipoId);
             request.setGuardiaId(guardia.getId());
             request.setTipoMovimiento(tipo);
-
             // Ejecutar y construir la respuesta
             RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
             Usuario usuario = nuevo.getUsuario();
-
             RegistroMovimientoResponse response = new RegistroMovimientoResponse(
                     usuario.getNombre(),
                     usuario.getDocumento(),
@@ -126,30 +113,9 @@ public class RegistroMovimientoController {
                     nuevo.getFechaHora().toString(),
                     nuevo.getTipoMovimiento().name()
             );
-
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar QR: " + e.getMessage());
         }
     }
-    @PostMapping("/simulado")
-    public ResponseEntity<?> registrarSimulado(@RequestBody MovimientoRequest request) {
-        RegistroMovimiento nuevo = movimientoService.registrarMovimiento(request);
-        Usuario usuario = nuevo.getUsuario();
-
-        RegistroMovimientoResponse response = new RegistroMovimientoResponse(
-                usuario.getNombre(),
-                usuario.getDocumento(),
-                nuevo.getEquipo().getMarca() + " - " + nuevo.getEquipo().getModelo(),
-                usuario.getCarrera(),
-                nuevo.getFechaHora().toString(),
-                nuevo.getTipoMovimiento().name()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-
 }
-
