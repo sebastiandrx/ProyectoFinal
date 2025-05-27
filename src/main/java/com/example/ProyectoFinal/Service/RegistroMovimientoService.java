@@ -32,6 +32,9 @@ public class RegistroMovimientoService {
         Usuario guardia = usuarioRepo.findById(request.getGuardiaId())
                 .orElseThrow(() -> new RuntimeException("Guardia no encontrado"));
 
+
+        
+
         RegistroMovimiento movimiento = new RegistroMovimiento();
         movimiento.setUsuario(usuario);
         movimiento.setEquipo(equipo);
