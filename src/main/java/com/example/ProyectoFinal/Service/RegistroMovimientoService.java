@@ -32,18 +32,23 @@ public class RegistroMovimientoService {
         Usuario guardia = usuarioRepo.findById(request.getGuardiaId())
                 .orElseThrow(() -> new RuntimeException("Guardia no encontrado"));
 
-
-        
-
+        // 🟢 Crear el nuevo registro del movimiento
         RegistroMovimiento movimiento = new RegistroMovimiento();
         movimiento.setUsuario(usuario);
         movimiento.setEquipo(equipo);
         movimiento.setGuardia(guardia);
         movimiento.setTipoMovimiento(request.getTipoMovimiento());
+
+        // 🟢 Establecer la fecha y hora actual del servidor
         movimiento.setFechaHora(LocalDateTime.now());
 
-        return registroRepo.save(movimiento);
+        // 🟢 Guardar el registro en la base de datos
+        RegistroMovimiento guardado = registroRepo.save(movimiento);
+
+        System.out.println("✅ Movimiento registrado con fecha: " + guardado.getFechaHora());
+        return guardado;
     }
+
 
     public List<RegistroMovimiento> historialPorUsuario(UUID id) {
         return registroRepo.findByUsuarioId(id);
