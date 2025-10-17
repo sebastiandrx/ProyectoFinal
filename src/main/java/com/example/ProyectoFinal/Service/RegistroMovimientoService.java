@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,7 +41,8 @@ public class RegistroMovimientoService {
         movimiento.setTipoMovimiento(request.getTipoMovimiento());
 
         // 🟢 Establecer la fecha y hora actual del servidor
-        movimiento.setFechaHora(LocalDateTime.now());
+        movimiento.setFechaHora(LocalDateTime.now(ZoneId.of("America/Bogota")));
+
 
         // 🟢 Guardar el registro en la base de datos
         RegistroMovimiento guardado = registroRepo.save(movimiento);
