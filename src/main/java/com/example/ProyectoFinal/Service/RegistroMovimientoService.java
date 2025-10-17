@@ -33,6 +33,18 @@ public class RegistroMovimientoService {
         Usuario guardia = usuarioRepo.findById(request.getGuardiaId())
                 .orElseThrow(() -> new RuntimeException("Guardia no encontrado"));
 
+        // 🛑 Evitar duplicados recientes
+        List<RegistroMovimiento> ultimos = registroRepo
+                .findByUsuarioIdAndEquipoIdOrderByFechaHoraDesc(usuario.getId(), equipo.getId());
+        if (!ultimos.isEmpty()) {
+            RegistroMovimiento ultimo = ultimos.get(0);
+            if (ultimo.getTipoMovimiento() == request.getTipoMovimiento() &&
+                    ultimo.getFechaHora().isAfter(LocalDateTime.now(ZoneId.of("America/Bogota")).minusSeconds(2))) {
+                System.out.println("⚠️ Movimiento duplicado evitado para usuario: " + usuario.getNombre());
+                return ultimo; // ⛔ No crear un nuevo registro
+            }
+        }
+
         // 🟢 Crear el nuevo registro del movimiento
         RegistroMovimiento movimiento = new RegistroMovimiento();
         movimiento.setUsuario(usuario);
