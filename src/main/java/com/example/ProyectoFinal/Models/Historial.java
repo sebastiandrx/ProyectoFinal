@@ -16,7 +16,7 @@ public class Historial {
     private String tipoMovimiento;
 
     @Column(name = "fecha_hora")
-    private LocalDateTime fechaHora;
+    private LocalDateTime fechaHora = LocalDateTime.now();
 
     @Column(columnDefinition = "TEXT")
     private String observacion;
