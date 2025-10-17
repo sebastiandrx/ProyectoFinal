@@ -24,6 +24,7 @@ public class HistorialService {
     }
 
     public Historial registrarMovimiento(Historial historial) {
+        historial.setFechaHora(java.time.LocalDateTime.now());
         return historialRepository.save(historial);
     }
 }
