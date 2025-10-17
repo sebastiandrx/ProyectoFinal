@@ -40,20 +40,6 @@ public class EquipoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Equipo> updateEquipo(@PathVariable UUID id, @RequestBody Equipo actualizado) {
-        return equipoRepo.findById(id)
-                .map(equipo -> {
-                    equipo.setMarca(actualizado.getMarca());
-                    equipo.setModelo(actualizado.getModelo());
-                    equipo.setSerial(actualizado.getSerial());
-                    equipo.setFotoUrl(actualizado.getFotoUrl());
-                    equipo.setUsuario(actualizado.getUsuario());
-                    return ResponseEntity.ok(equipoRepo.save(equipo));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEquipo(@PathVariable UUID id) {
         return equipoRepo.findById(id)
