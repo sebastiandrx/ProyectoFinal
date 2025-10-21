@@ -71,30 +71,30 @@ public class EquipoController {
 
         return ResponseEntity.ok(guardado);
     }
+
     // 🔹 PUT para actualizar los datos del equipo
     @PutMapping("/{id}")
-    public ResponseEntity<Equipo> actualizarEquipo(
+    public ResponseEntity<?> actualizarEquipo(
             @PathVariable UUID id,
-            @RequestBody Equipo nuevoEquipo) {
+            @RequestBody DispositivoRequest request) {
 
         Optional<Equipo> optionalEquipo = equipoRepo.findById(id);
 
-        if (optionalEquipo.isPresent()) {
-            Equipo equipoExistente = optionalEquipo.get();
-
-            equipoExistente.setMarca(nuevoEquipo.getMarca());
-            equipoExistente.setModelo(nuevoEquipo.getModelo());
-            equipoExistente.setSerial(nuevoEquipo.getSerial());
-
-            // 🖼️ Si el usuario cambia la URL de la foto, actualízala
-            if (nuevoEquipo.getFotoUrl() != null && !nuevoEquipo.getFotoUrl().isBlank()) {
-                equipoExistente.setFotoUrl(nuevoEquipo.getFotoUrl());
-            }
-
-            Equipo actualizado = equipoRepo.save(equipoExistente);
-            return ResponseEntity.ok(actualizado);
-        } else {
+        if (!optionalEquipo.isPresent()) {
             return ResponseEntity.notFound().build();
         }
+
+        Equipo equipoExistente = optionalEquipo.get();
+
+        equipoExistente.setMarca(request.getMarca());
+        equipoExistente.setModelo(request.getModelo());
+        equipoExistente.setSerial(request.getSerial());
+
+        if (request.getFotoUrl() != null && !request.getFotoUrl().isBlank()) {
+            equipoExistente.setFotoUrl(request.getFotoUrl());
+        }
+
+        Equipo actualizado = equipoRepo.save(equipoExistente);
+        return ResponseEntity.ok(actualizado);
     }
 }
